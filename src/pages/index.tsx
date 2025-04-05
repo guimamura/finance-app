@@ -2,7 +2,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
-import { getStorageItem } from "@/lib/storage";
 
 const loginSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -22,28 +21,27 @@ export default function LoginPage() {
   });
 
   const onSubmit = (data: LoginData) => {
-    const user = getStorageItem("user") as LoginData;
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+    const user = users.find(
+      (user: LoginData) =>
+        user.email === data.email && user.password === data.password
+    );
 
     if (!user) {
-      alert("Usuário não encontrado. Cadastre-se primeiro.");
+      alert("Usuário não encontrado ou senha incorreta.");
       return;
     }
 
-    if (user.email !== data.email || user.password !== data.password) {
-      alert("E-mail ou senha incorretos.");
-      return;
-    }
-
-    // Salvar sessão no storage
     localStorage.setItem(
       "session",
       JSON.stringify({
         email: user.email,
-        expiresAt: new Date().getTime() + 1000 * 60 * 30, // 30 minutos
+        expiresAt: new Date().getTime() + 1000 * 60 * 30,
       })
     );
 
-    router.push("/dashboard"); // Redireciona para área logada
+    router.push("/dashboard");
   };
 
   return (
@@ -60,6 +58,17 @@ export default function LoginPage() {
 
       <button type="button" onClick={() => router.push("/register")}>
         Criar conta
+      </button>
+
+      <button
+        type="button"
+        onClick={() => {
+          localStorage.clear();
+          alert("localStorage limpo!");
+        }}
+        className="text-sm text-gray-500 underline mt-4"
+      >
+        Limpar localStorage
       </button>
     </form>
   );

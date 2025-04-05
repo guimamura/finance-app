@@ -2,11 +2,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
-import { setStorageItem } from "@/lib/storage";
 
 const registerSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(4, "A senha deve ter no mínimo 4 caracteres"),
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(1, "Senha obrigatória"),
 });
 
 type RegisterData = z.infer<typeof registerSchema>;
@@ -22,14 +21,29 @@ export default function RegisterPage() {
   });
 
   const onSubmit = (data: RegisterData) => {
-    setStorageItem("user", data);
-    alert("Usuário cadastrado com sucesso!");
+    const users = JSON.parse(localStorage.getItem("users") || "[]");
+
+    const userExists = users.some(
+      (user: RegisterData) => user.email === data.email
+    );
+
+    if (userExists) {
+      alert("E-mail já cadastrado.");
+      return;
+    }
+
+    users.push(data);
+
+    localStorage.setItem("users", JSON.stringify(users));
+
+    alert("Cadastro realizado com sucesso!");
+
     router.push("/");
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <h1>Criar conta</h1>
+      <h1>Criar Conta</h1>
 
       <input placeholder="E-mail" {...register("email")} />
       {errors.email && <p>{errors.email.message}</p>}
@@ -40,7 +54,7 @@ export default function RegisterPage() {
       <button type="submit">Cadastrar</button>
 
       <button type="button" onClick={() => router.push("/")}>
-        Voltar para o login
+        Voltar para login
       </button>
     </form>
   );

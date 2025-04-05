@@ -14,9 +14,18 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const user = getStorageItem("user");
+    const session = getStorageItem("session") as {
+      email: string;
+      expiresAt: number;
+    };
 
-    if (!user) {
+    if (!session) {
+      router.push("/");
+      return;
+    }
+
+    if (new Date().getTime() > session.expiresAt) {
+      removeStorageItem("session");
       router.push("/");
       return;
     }
@@ -57,7 +66,12 @@ export default function Dashboard() {
   };
 
   const handleLogout = () => {
-    removeStorageItem("user");
+    localStorage.removeItem("user");
+    router.push("/");
+  };
+
+  const handleClearStorage = () => {
+    localStorage.clear();
     router.push("/");
   };
 
@@ -65,12 +79,20 @@ export default function Dashboard() {
     <div className="p-4">
       <header className="flex justify-between items-center mb-4">
         <h1 className="text-xl">Bem-vindo!</h1>
-        <button
-          onClick={handleLogout}
-          className="bg-red-500 text-white px-4 py-2 rounded"
-        >
-          Sair
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleClearStorage}
+            className="text-sm text-gray-500 underline"
+          >
+            Limpar localStorage
+          </button>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-4 py-2 rounded"
+          >
+            Sair
+          </button>
+        </div>
       </header>
 
       {loading ? (
