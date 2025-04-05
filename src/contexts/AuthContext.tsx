@@ -1,4 +1,4 @@
-import { createContext, useState, ReactNode } from "react";
+import { createContext, useState, useEffect, ReactNode } from "react";
 import { getStorageItem } from "@/lib/storage";
 
 type User = {
@@ -19,11 +19,15 @@ type AuthProviderProps = {
 };
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const storageUser = getStorageItem<User>("user");
+  const [user, setUser] = useState<User | null>(null);
 
-  const [user, setUser] = useState<User | null>(
-    storageUser && Object.keys(storageUser).length > 0 ? storageUser : null
-  );
+  useEffect(() => {
+    const storageUser = getStorageItem<User>("user");
+
+    if (storageUser && Object.keys(storageUser).length > 0) {
+      setUser(storageUser);
+    }
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>
