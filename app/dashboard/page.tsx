@@ -1,5 +1,7 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { getStorageItem, removeStorageItem } from "@/lib/storage";
 import QuoteCard from "@/components/QuoteCard";
 import QuoteSearch from "@/components/QuoteSearch";
@@ -187,7 +189,7 @@ export default function Dashboard() {
   return (
     <div className="p-4">
       <header className="flex justify-between items-center mb-4">
-        <h1 className="text-xl">Bem-vindo!</h1>
+        <h1 className="text-xl">Lista de cotações</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={handleClearStorage}

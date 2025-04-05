@@ -1,7 +1,9 @@
+"use client";
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 const registerSchema = z.object({
   email: z.string().email("E-mail inválido"),

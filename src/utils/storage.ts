@@ -13,7 +13,7 @@ export const getUser = (): User | null => {
 };
 
 export const saveSession = () => {
-  const expiration = new Date().getTime() + 30 * 60 * 1000; // 30 minutos
+  const expiration = new Date().getTime() + 30 * 60 * 1000;
   localStorage.setItem(SESSION_KEY, expiration.toString());
 };
 

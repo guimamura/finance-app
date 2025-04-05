@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 
 type Currency = {
   name: string;
@@ -19,17 +19,16 @@ type Bitcoin = {
   variation: string | null;
 };
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const search = searchParams.get("search") || "";
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-  const search = Array.isArray(req.query.search)
-    ? req.query.search[0]
-    : req.query.search || "";
 
   if (!apiKey) {
-    return res.status(500).json({ error: "API Key not found" });
+    return new NextResponse(JSON.stringify({ error: "API Key not found" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   try {
@@ -116,14 +115,23 @@ export default async function handler(
       ),
     };
 
-    res.status(200).json({ results: filteredData });
+    return NextResponse.json({ results: filteredData });
   } catch (error) {
     if (error instanceof Error) {
       console.error("Erro ao buscar cotações:", error.message);
-      res.status(500).json({ error: error.message });
+      return new NextResponse(JSON.stringify({ error: error.message }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
     } else {
       console.error("Erro desconhecido:", error);
-      res.status(500).json({ error: "Erro desconhecido ao buscar cotações" });
+      return new NextResponse(
+        JSON.stringify({ error: "Erro desconhecido ao buscar cotações" }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
   }
 }
