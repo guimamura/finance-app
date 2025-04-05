@@ -1,53 +1,47 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
-import { saveUser } from "@/utils/storage";
-import { User } from "@/types/User";
+import { setStorageItem } from "@/lib/storage";
+
+const registerSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(4, "A senha deve ter no mínimo 4 caracteres"),
+});
+
+type RegisterData = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState<User>({
-    name: "",
-    email: "",
-    password: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterData>({
+    resolver: zodResolver(registerSchema),
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    saveUser(form);
+  const onSubmit = (data: RegisterData) => {
+    setStorageItem("user", data);
+    alert("Usuário cadastrado com sucesso!");
     router.push("/");
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-80">
-        <h1 className="text-2xl font-bold">Cadastro</h1>
-        <input
-          name="name"
-          placeholder="Nome"
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="email"
-          placeholder="Email"
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="password"
-          placeholder="Senha"
-          type="password"
-          onChange={handleChange}
-          required
-        />
-        <button type="submit" className="bg-blue-500 text-white py-2 rounded">
-          Cadastrar
-        </button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <h1>Criar conta</h1>
+
+      <input placeholder="E-mail" {...register("email")} />
+      {errors.email && <p>{errors.email.message}</p>}
+
+      <input placeholder="Senha" type="password" {...register("password")} />
+      {errors.password && <p>{errors.password.message}</p>}
+
+      <button type="submit">Cadastrar</button>
+
+      <button type="button" onClick={() => router.push("/")}>
+        Voltar para o login
+      </button>
+    </form>
   );
 }

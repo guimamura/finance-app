@@ -1,55 +1,66 @@
-import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
-import { getUser, saveSession, isSessionActive } from "@/utils/storage";
+import { getStorageItem } from "@/lib/storage";
+
+const loginSchema = z.object({
+  email: z.string().email("E-mail inválido"),
+  password: z.string().min(1, "Senha obrigatória"),
+});
+
+type LoginData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginData>({
+    resolver: zodResolver(loginSchema),
+  });
 
-  useEffect(() => {
-    if (isSessionActive()) {
-      router.push("/dashboard");
-    }
-  }, [router]);
+  const onSubmit = (data: LoginData) => {
+    const user = getStorageItem("user") as LoginData;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const user = getUser();
-    if (user && user.email === email && user.password === password) {
-      saveSession();
-      router.push("/dashboard");
-    } else {
-      alert("Usuário ou senha inválidos.");
+    if (!user) {
+      alert("Usuário não encontrado. Cadastre-se primeiro.");
+      return;
     }
+
+    if (user.email !== data.email || user.password !== data.password) {
+      alert("E-mail ou senha incorretos.");
+      return;
+    }
+
+    // Salvar sessão no storage
+    localStorage.setItem(
+      "session",
+      JSON.stringify({
+        email: user.email,
+        expiresAt: new Date().getTime() + 1000 * 60 * 30, // 30 minutos
+      })
+    );
+
+    router.push("/dashboard"); // Redireciona para área logada
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-80">
-        <h1 className="text-2xl font-bold">Login</h1>
-        <input
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          placeholder="Senha"
-          type="password"
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit" className="bg-blue-500 text-white py-2 rounded">
-          Entrar
-        </button>
-        <button
-          type="button"
-          onClick={() => router.push("/register")}
-          className="text-sm underline"
-        >
-          Não tem conta? Cadastre-se
-        </button>
-      </form>
-    </div>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <h1>Login</h1>
+
+      <input placeholder="E-mail" {...register("email")} />
+      {errors.email && <p>{errors.email.message}</p>}
+
+      <input placeholder="Senha" type="password" {...register("password")} />
+      {errors.password && <p>{errors.password.message}</p>}
+
+      <button type="submit">Entrar</button>
+
+      <button type="button" onClick={() => router.push("/register")}>
+        Criar conta
+      </button>
+    </form>
   );
 }
