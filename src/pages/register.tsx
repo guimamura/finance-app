@@ -21,20 +21,20 @@ export default function RegisterPage() {
   });
 
   const onSubmit = (data: RegisterData) => {
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
+    const users = JSON.parse(
+      localStorage.getItem("users") || "[]"
+    ) as RegisterData[];
 
-    const userExists = users.some(
-      (user: RegisterData) => user.email === data.email
-    );
+    const userExists = users.some((user) => user.email === data.email);
 
     if (userExists) {
       alert("E-mail já cadastrado.");
       return;
     }
 
-    users.push(data);
+    const newUsers = [...users, data];
 
-    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("users", JSON.stringify(newUsers));
 
     alert("Cadastro realizado com sucesso!");
 

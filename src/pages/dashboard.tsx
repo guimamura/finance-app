@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { getStorageItem, removeStorageItem } from "@/lib/storage";
+import { QuoteCard } from "@/components/QuoteCard";
 
 type Quote = {
   name: string;
   code: string;
   bid: string;
+  variation: string;
 };
 
 export default function Dashboard() {
@@ -54,6 +56,7 @@ export default function Dashboard() {
             code: key,
             name: currency.name,
             bid: currency.buy,
+            variation: currency.variation,
           };
         }) as Quote[];
 
@@ -100,20 +103,13 @@ export default function Dashboard() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {quotes.map((quote) => (
-            <div
+            <QuoteCard
               key={quote.code}
-              className="border p-4 rounded shadow bg-white"
-            >
-              <p className="font-semibold">{quote.name}</p>
-              <p>Código: {quote.code}</p>
-              <p>
-                Valor:{" "}
-                {Number(quote.bid).toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })}
-              </p>
-            </div>
+              name={quote.name}
+              code={quote.code}
+              bid={quote.bid}
+              variation={quote.variation}
+            />
           ))}
         </div>
       )}
