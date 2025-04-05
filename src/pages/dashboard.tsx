@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { getStorageItem, removeStorageItem } from "@/lib/storage";
@@ -9,6 +10,7 @@ type Quote = {
 };
 
 export default function Dashboard() {
+  const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
   const router = useRouter();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +29,7 @@ export default function Dashboard() {
   const fetchQuotes = async () => {
     try {
       const response = await fetch(
-        `https://api.hgbrasil.com/finance?format=json&key=API_KEY`
+        `https://api.hgbrasil.com/finance?format=json&key=${API_KEY}`
       );
       const data = await response.json();
 
