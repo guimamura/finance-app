@@ -29,10 +29,26 @@ export default function Dashboard() {
       const response = await fetch("/api/quotes");
       const data = await response.json();
 
-      const { USD, EUR, GBP, BTC, ETH, CAD, JPY, AUD, CNY, ARS } =
-        data.results.currencies;
+      const currencies = data.results.currencies;
 
-      setQuotes([USD, EUR, GBP, BTC, ETH, CAD, JPY, AUD, CNY, ARS]);
+      const quotesArray = Object.entries(currencies)
+        .filter(([key]) => key !== "source")
+        .map(([key, value]) => {
+          const currency = value as {
+            name: string;
+            buy: string;
+            sell: string;
+            variation: string;
+          };
+
+          return {
+            code: key,
+            name: currency.name,
+            bid: currency.buy,
+          };
+        }) as Quote[];
+
+      setQuotes(quotesArray);
     } catch (error) {
       console.error("Erro ao buscar cotações", error);
     } finally {
@@ -68,7 +84,13 @@ export default function Dashboard() {
             >
               <p className="font-semibold">{quote.name}</p>
               <p>Código: {quote.code}</p>
-              <p>Valor: R$ {quote.bid}</p>
+              <p>
+                Valor:{" "}
+                {Number(quote.bid).toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </p>
             </div>
           ))}
         </div>
