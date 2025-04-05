@@ -28,7 +28,7 @@ export default function Dashboard() {
   const fetchQuotes = async () => {
     try {
       const response = await fetch(
-        `https://api.hgbrasil.com/finance?format=json&key=${apiKey}`
+        `https://api.hgbrasil.com/finance?format=json-cors&key=${apiKey}`
       );
       const data = await response.json();
 

@@ -7,7 +7,7 @@ export default async function handler(
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const { search } = req.query;
 
-  const url = `https://api.hgbrasil.com/finance/stock_price?key=${apiKey}${
+  const url = `https://api.hgbrasil.com/finance/stock_price?format=json-cors&key=${apiKey}${
     search ? `&symbol=${search}` : ""
   }`;
 
