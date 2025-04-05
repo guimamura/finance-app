@@ -9,7 +9,6 @@ type Quote = {
 };
 
 export default function Dashboard() {
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const router = useRouter();
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,9 +26,7 @@ export default function Dashboard() {
 
   const fetchQuotes = async () => {
     try {
-      const response = await fetch(
-        `https://api.hgbrasil.com/finance?format=json-cors&key=${apiKey}`
-      );
+      const response = await fetch("/api/quotes");
       const data = await response.json();
 
       const { USD, EUR, GBP, BTC, ETH, CAD, JPY, AUD, CNY, ARS } =

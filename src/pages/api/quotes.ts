@@ -5,18 +5,24 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-  const { search } = req.query;
 
-  const url = `https://api.hgbrasil.com/finance/stock_price?format=json-cors&key=${apiKey}${
-    search ? `&symbol=${search}` : ""
-  }`;
+  if (!apiKey) {
+    return res.status(500).json({ error: "API Key not found" });
+  }
 
   try {
-    const response = await fetch(url);
-    const data = await response.json();
+    const response = await fetch(
+      `https://api.hgbrasil.com/finance?format=json-cors&key=${apiKey}`
+    );
 
+    if (!response.ok) {
+      throw new Error("Failed to fetch quotes");
+    }
+
+    const data = await response.json();
     res.status(200).json(data);
-  } catch {
-    res.status(500).json({ error: "Erro ao buscar cotações." });
+  } catch (error) {
+    console.error("Erro ao buscar cotações", error);
+    res.status(500).json({ error: "Erro ao buscar cotações" });
   }
 }
