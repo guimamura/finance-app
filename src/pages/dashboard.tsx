@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { getStorageItem, removeStorageItem } from "@/lib/storage";
-import { QuoteCard } from "@/components/QuoteCard";
+import QuoteCard from "@/components/QuoteCard";
+import QuoteSearch from "@/components/QuoteSearch";
 
 type Quote = {
   name: string;
@@ -12,7 +13,8 @@ type Quote = {
 
 export default function Dashboard() {
   const router = useRouter();
-  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [, setQuotes] = useState<Quote[]>([]);
+  const [filteredQuotes, setFilteredQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,28 +41,132 @@ export default function Dashboard() {
     try {
       const response = await fetch("/api/quotes");
       const data = await response.json();
+      console.log("Dados da API:", data);
 
       const currencies = data.results.currencies;
+      const stocks = data.results.stocks;
+      const bitcoin = data.results.bitcoin;
 
-      const quotesArray = Object.entries(currencies)
-        .filter(([key]) => key !== "source")
-        .map(([key, value]) => {
-          const currency = value as {
+      const quotesArray = [
+        ...Object.entries(currencies)
+          .filter(([key]) => key !== "source")
+          .map(([key, value]) => {
+            const currency = value as {
+              name: string;
+              buy: string;
+              sell: string;
+              variation: string;
+            };
+
+            return {
+              code: key,
+              name: currency.name,
+              bid: currency.buy,
+              variation: currency.variation,
+            };
+          }),
+        ...Object.entries(stocks).map(([key, value]) => {
+          const stock = value as {
             name: string;
-            buy: string;
-            sell: string;
+            points: string;
             variation: string;
           };
 
           return {
             code: key,
-            name: currency.name,
-            bid: currency.buy,
-            variation: currency.variation,
+            name: stock.name,
+            bid: stock.points,
+            variation: stock.variation,
           };
-        }) as Quote[];
+        }),
+        ...Object.entries(bitcoin).map(([key, value]) => {
+          const btc = value as {
+            name: string;
+            last: number;
+            variation: number;
+          };
 
-      setQuotes(quotesArray);
+          return {
+            code: key,
+            name: btc.name,
+            bid: btc.last.toString(),
+            variation: btc.variation.toString(),
+          };
+        }),
+      ];
+
+      const limitedQuotes = quotesArray.slice(0, 10);
+      setQuotes(limitedQuotes);
+      setFilteredQuotes(limitedQuotes);
+    } catch (error) {
+      console.error("Erro ao buscar cotações", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = async (searchTerm: string) => {
+    setLoading(true);
+
+    try {
+      const response = await fetch(`/api/quotes?search=${searchTerm}`);
+      const data = await response.json();
+      console.log("Dados filtrados da API:", data);
+
+      const currencies = data.results.currencies;
+      const stocks = data.results.stocks;
+      const bitcoin = data.results.bitcoin;
+
+      const quotesArray = [
+        ...Object.entries(currencies)
+          .filter(([key]) => key !== "source")
+          .map(([key, value]) => {
+            const currency = value as {
+              name: string;
+              buy: string;
+              sell: string;
+              variation: string;
+            };
+
+            return {
+              code: key,
+              name: currency.name,
+              bid: currency.buy,
+              variation: currency.variation,
+            };
+          }),
+        ...Object.entries(stocks).map(([key, value]) => {
+          const stock = value as {
+            name: string;
+            points: string;
+            variation: string;
+          };
+
+          return {
+            code: key,
+            name: stock.name,
+            bid: stock.points,
+            variation: stock.variation,
+          };
+        }),
+        ...Object.entries(bitcoin).map(([key, value]) => {
+          const btc = value as {
+            name: string;
+            last: number;
+            variation: number;
+          };
+
+          return {
+            code: key,
+            name: btc.name,
+            bid: btc.last.toString(),
+            variation: btc.variation.toString(),
+          };
+        }),
+      ];
+
+      const limitedQuotes = quotesArray.slice(0, 10);
+      setFilteredQuotes(limitedQuotes);
     } catch (error) {
       console.error("Erro ao buscar cotações", error);
     } finally {
@@ -98,11 +204,15 @@ export default function Dashboard() {
         </div>
       </header>
 
+      <QuoteSearch onSearch={handleSearch} />
+
       {loading ? (
         <p>Carregando cotações...</p>
+      ) : filteredQuotes.length === 0 ? (
+        <p>Nenhuma cotação encontrada para o termo buscado.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {quotes.map((quote) => (
+          {filteredQuotes.map((quote) => (
             <QuoteCard
               key={quote.code}
               name={quote.name}

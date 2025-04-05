@@ -5,7 +5,7 @@ type QuoteCardProps = {
   variation: string;
 };
 
-export const QuoteCard = ({ name, code, bid, variation }: QuoteCardProps) => {
+const QuoteCard = ({ name, code, bid, variation }: QuoteCardProps) => {
   const variationNumber = Number(variation);
 
   const getVariationText = () => {
@@ -39,3 +39,5 @@ export const QuoteCard = ({ name, code, bid, variation }: QuoteCardProps) => {
     </div>
   );
 };
+
+export default QuoteCard;
