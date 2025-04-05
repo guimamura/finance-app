@@ -4,11 +4,12 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
   const { search } = req.query;
 
-  const url = `https://api.hgbrasil.com/finance/stock_price?key=${
-    process.env.API_KEY
-  }${search ? `&symbol=${search}` : ""}`;
+  const url = `https://api.hgbrasil.com/finance/stock_price?key=${apiKey}${
+    search ? `&symbol=${search}` : ""
+  }`;
 
   try {
     const response = await fetch(url);
