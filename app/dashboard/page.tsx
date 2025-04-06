@@ -8,6 +8,7 @@ import { getStorageItem, removeStorageItem } from "@/lib/storage";
 import QuoteCard from "@/components/QuoteCard";
 import QuoteSearch from "@/components/QuoteSearch";
 import { LogOut, Trash } from "lucide-react";
+import { Quote } from "@/types/QuoteTypes";
 import QuoteChart from "@/components/QuoteChart";
 import { useQuoteHistoryStore } from "@/store/quoteHistoryStore";
 
@@ -28,14 +29,6 @@ interface APIBitcoin {
   variation: string | null;
 }
 
-interface Quote {
-  code: string;
-  name: string;
-  buy: number;
-  sell: number | null;
-  variation: number;
-}
-
 export default function Dashboard() {
   const router = useRouter();
   const [filteredQuotes, setFilteredQuotes] = useState<Quote[]>([]);
@@ -53,6 +46,9 @@ export default function Dashboard() {
     (state) => state.initializeHistory
   );
   const updateHistory = useQuoteHistoryStore((state) => state.updateHistory);
+  const getHistoryForQuote = useQuoteHistoryStore(
+    (state) => state.getHistoryForQuote
+  );
   const clearHistory = useQuoteHistoryStore((state) => state.clearHistory);
 
   const fetchInitialQuotes = useCallback(async () => {
@@ -193,6 +189,10 @@ export default function Dashboard() {
     setSelectedQuoteCode(null);
   };
 
+  const currentQuoteHistory = selectedQuoteCode
+    ? getHistoryForQuote(selectedQuoteCode)
+    : [];
+
   return (
     <div className="min-h-screen bg-gray-100 py-6">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -261,11 +261,19 @@ export default function Dashboard() {
               <h2 className="text-xl font-semibold mb-4">
                 Variação de {selectedQuoteCode}
               </h2>
-              <QuoteChart
-                dataKey="variation"
-                quoteCode={selectedQuoteCode}
-                onClose={closeChart}
-              />
+              {currentQuoteHistory.length > 0 ? (
+                <QuoteChart data={currentQuoteHistory} dataKey="variation" />
+              ) : (
+                <p className="text-gray-500">
+                  Histórico de variação não disponível desde o login.
+                </p>
+              )}
+              <button
+                onClick={closeChart}
+                className="mt-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Fechar
+              </button>
             </div>
           </div>
         )}
