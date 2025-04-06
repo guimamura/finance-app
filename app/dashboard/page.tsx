@@ -1,140 +1,189 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { getStorageItem, removeStorageItem } from "@/lib/storage";
 import QuoteCard from "@/components/QuoteCard";
 import QuoteSearch from "@/components/QuoteSearch";
 import { LogOut, Trash } from "lucide-react";
+import { Quote } from "@/types/Quote";
+import QuoteChart from "@/components/QuoteChart";
+import { useQuoteHistoryStore } from "@/store/quoteHistoryStore";
 
-type Quote = {
+interface APICurrency {
   name: string;
-  code: string;
-  bid: string;
-  variation: string;
-};
+  buy: string;
+  sell: string | null;
+  variation: string | null;
+}
+interface APIStock {
+  name: string;
+  points: string;
+  variation: string | null;
+}
+interface APIBitcoin {
+  name: string;
+  last: string;
+  variation: string | null;
+}
 
 export default function Dashboard() {
   const router = useRouter();
   const [filteredQuotes, setFilteredQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedQuoteCode, setSelectedQuoteCode] = useState<string | null>(
+    null
+  );
+  const [isChartOpen, setIsChartOpen] = useState(false);
+
+  const setLoginTimestamp = useQuoteHistoryStore(
+    (state) => state.setLoginTimestamp
+  );
+  const initializeHistory = useQuoteHistoryStore(
+    (state) => state.initializeHistory
+  );
+  const updateHistory = useQuoteHistoryStore((state) => state.updateHistory);
+  const clearHistory = useQuoteHistoryStore((state) => state.clearHistory);
+
+  const fetchInitialQuotes = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/quotes");
+      const data = await response.json();
+      if (data?.results) {
+        const initialQuotes = transformAPIDataToQuotes(data.results);
+        setFilteredQuotes(initialQuotes.slice(0, 10));
+        initializeHistory(
+          initialQuotes.map((q) => ({ code: q.code, variation: q.variation }))
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao buscar cotações iniciais", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [initializeHistory]);
 
   useEffect(() => {
     const session = getStorageItem("session") as {
       email: string;
       expiresAt: number;
+      loginTime: number;
     };
-
     if (!session) {
       router.push("/");
       return;
     }
-
     if (new Date().getTime() > session.expiresAt) {
       removeStorageItem("session");
       router.push("/");
       return;
     }
+    setLoginTimestamp(session.loginTime);
+    fetchInitialQuotes();
+    const intervalId = setInterval(fetchAndUpdateQuotes, 60000);
+    return () => clearInterval(intervalId);
+  }, [router, fetchInitialQuotes, setLoginTimestamp]);
 
-    fetchQuotes();
-  }, [router]);
-
-  const fetchQuotes = async () => {
-    setLoading(true);
+  const fetchAndUpdateQuotes = useCallback(async () => {
     try {
-      const response = await fetch("/api/quotes");
+      const response = await fetch(`/api/quotes?search=${searchTerm}`);
       const data = await response.json();
-
-      const currencies = data.results?.currencies || {};
-      const stocks = data.results?.stocks || {};
-      const bitcoin = data.results?.bitcoin || {};
-
-      const quotesArray = [
-        ...Object.entries(currencies)
-          .filter(([key]) => key !== "source")
-          .map(([key, value]) => ({
-            code: key,
-            name: (value as { name: string }).name,
-            bid: (value as { buy: string }).buy,
-            variation: (value as { variation: string }).variation,
-          })),
-        ...Object.entries(stocks).map(([key, value]) => ({
-          code: key,
-          name: (value as { name: string }).name,
-          bid: (value as { points: string }).points,
-          variation: (value as { variation: string }).variation,
-        })),
-        ...Object.entries(bitcoin).map(([key, value]) => ({
-          code: key,
-          name: (value as { name: string }).name,
-          bid: (value as { last: number }).last?.toString() || "N/A",
-          variation:
-            (value as { variation: number }).variation?.toString() || "N/A",
-        })),
-      ];
-
-      const limitedQuotes = quotesArray.slice(0, 10);
-      setFilteredQuotes(limitedQuotes);
+      if (data?.results) {
+        const updatedQuotes = transformAPIDataToQuotes(data.results);
+        setFilteredQuotes(updatedQuotes.slice(0, 10));
+        updateHistory(
+          updatedQuotes.map((q) => ({ code: q.code, variation: q.variation }))
+        );
+      }
     } catch (error) {
-      console.error("Erro ao buscar cotações", error);
-    } finally {
-      setLoading(false);
+      console.error("Erro ao atualizar cotações", error);
     }
+  }, [searchTerm, updateHistory]);
+
+  const transformAPIDataToQuotes = (results: {
+    currencies: Record<string, APICurrency>;
+    stocks: Record<string, APIStock>;
+    bitcoin: Record<string, APIBitcoin>;
+  }): Quote[] => {
+    const quotes: Quote[] = [];
+    if (results.currencies) {
+      Object.entries(results.currencies)
+        .filter(([key]) => key !== "source")
+        .forEach(([key, value]) => {
+          quotes.push({
+            code: key,
+            name: value.name,
+            buy: parseFloat(value.buy),
+            sell: value.sell ? parseFloat(value.sell) : null,
+            variation: parseFloat(value.variation || "0"),
+          });
+        });
+    }
+    if (results.stocks) {
+      Object.entries(results.stocks).forEach(([key, value]) => {
+        quotes.push({
+          code: key,
+          name: value.name,
+          buy: parseFloat(value.points),
+          sell: null,
+          variation: parseFloat(value.variation || "0"),
+        });
+      });
+    }
+    if (results.bitcoin) {
+      Object.entries(results.bitcoin).forEach(([key, value]) => {
+        quotes.push({
+          code: key,
+          name: value.name,
+          buy: parseFloat(value.last),
+          sell: null,
+          variation: parseFloat(value.variation || "0"),
+        });
+      });
+    }
+    return quotes;
   };
 
-  const handleSearch = async (searchTerm: string) => {
+  const handleSearch = useCallback(async (searchTerm: string) => {
     setLoading(true);
     setSearchTerm(searchTerm);
     try {
       const response = await fetch(`/api/quotes?search=${searchTerm}`);
       const data = await response.json();
-
-      const currencies = data.results?.currencies || {};
-      const stocks = data.results?.stocks || {};
-      const bitcoin = data.results?.bitcoin || {};
-
-      const quotesArray = [
-        ...Object.entries(currencies)
-          .filter(([key]) => key !== "source")
-          .map(([key, value]) => ({
-            code: key,
-            name: (value as { name: string }).name,
-            bid: (value as { buy: string }).buy,
-            variation: (value as { variation: string }).variation,
-          })),
-        ...Object.entries(stocks).map(([key, value]) => ({
-          code: key,
-          name: (value as { name: string }).name,
-          bid: (value as { points: string }).points,
-          variation: (value as { variation: string }).variation,
-        })),
-        ...Object.entries(bitcoin).map(([key, value]) => ({
-          code: key,
-          name: (value as { name: string }).name,
-          bid: (value as { last: number }).last?.toString() || "N/A",
-          variation:
-            (value as { variation: number }).variation?.toString() || "N/A",
-        })),
-      ];
-
-      setFilteredQuotes(quotesArray.slice(0, 10));
+      if (data?.results) {
+        setFilteredQuotes(transformAPIDataToQuotes(data.results).slice(0, 10));
+      }
     } catch (error) {
       console.error("Erro ao buscar cotações", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    removeStorageItem("session");
+    clearHistory();
     router.push("/");
   };
 
   const handleClearStorage = () => {
     localStorage.clear();
+    clearHistory();
     router.push("/");
+  };
+
+  const openChart = (code: string) => {
+    setSelectedQuoteCode(code);
+    setIsChartOpen(true);
+  };
+
+  const closeChart = () => {
+    setIsChartOpen(false);
+    setSelectedQuoteCode(null);
   };
 
   return (
@@ -184,19 +233,35 @@ export default function Dashboard() {
               filteredQuotes.map((quote) => (
                 <li
                   key={quote.code}
-                  className="shadow-sm rounded-md bg-gray-50 hover:bg-gray-100 transition duration-150 ease-in-out"
+                  className="shadow-sm rounded-md bg-gray-50 hover:bg-gray-100 transition duration-150 ease-in-out cursor-pointer"
+                  onClick={() => openChart(quote.code)}
                 >
                   <QuoteCard
                     name={quote.name}
                     code={quote.code}
-                    bid={quote.bid}
-                    variation={quote.variation}
+                    bid={quote.buy?.toString() || "N/A"}
+                    variation={quote.variation?.toString() || "0"}
                   />
                 </li>
               ))
             )}
           </ul>
         </div>
+
+        {isChartOpen && selectedQuoteCode && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-md shadow-lg p-6 max-w-2xl w-full">
+              <h2 className="text-xl font-semibold mb-4">
+                Variação de {selectedQuoteCode}
+              </h2>
+              <QuoteChart
+                dataKey="variation"
+                quoteCode={selectedQuoteCode}
+                onClose={closeChart}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
