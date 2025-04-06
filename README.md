@@ -69,40 +69,6 @@ Este projeto é uma aplicação web que exibe cotações financeiras de moedas, 
 
 2.  Abra seu navegador e acesse `http://localhost:3000`.
 
-## Estrutura de Pastas
-
-.
-├── app
-│ └── api
-│ └── quotes
-│ └── route.ts # Rota da API para buscar as cotações
-│ └── dashboard
-│ └── page.tsx # Componente da página do dashboard
-│ └── login
-│ └── page.tsx # Componente da página de login
-│ └── page.tsx # Componente da página inicial (redireciona para /login)
-├── components
-│ ├── QuoteCard.tsx # Componente para exibir um card de cotação
-│ ├── QuoteChart.tsx # Componente para exibir o gráfico de variação
-│ └── QuoteSearch.tsx # Componente para a barra de busca de cotações
-├── lib
-│ └── quotes.ts # Lógica para buscar e filtrar cotações (não mais usado diretamente)
-│ └── storage.ts # Utilitários para interagir com localStorage
-├── store
-│ └── quoteHistoryStore.ts # Store do Zustand para gerenciar o histórico de cotações
-├── types
-│ ├── Quote.ts # Definição do tipo Quote
-│ ├── QuoteTypes.ts # Definições de tipos para dados da API
-│ └── User.ts # Definição do tipo User
-├── .env.local # Arquivo de variáveis de ambiente
-├── .gitignore
-├── next.config.js
-├── package.json
-├── postcss.config.js
-├── README.md
-├── tailwind.config.js
-└── tsconfig.json
-
 ## Créditos
 
 - Este projeto utiliza dados da [HG Brasil Finance API](https://hgbrasil.com/status/finance).
