@@ -8,7 +8,6 @@ import { getStorageItem, removeStorageItem } from "@/lib/storage";
 import QuoteCard from "@/components/QuoteCard";
 import QuoteSearch from "@/components/QuoteSearch";
 import { LogOut, Trash } from "lucide-react";
-import { Quote } from "@/types/Quote";
 import QuoteChart from "@/components/QuoteChart";
 import { useQuoteHistoryStore } from "@/store/quoteHistoryStore";
 
@@ -27,6 +26,14 @@ interface APIBitcoin {
   name: string;
   last: string;
   variation: string | null;
+}
+
+interface Quote {
+  code: string;
+  name: string;
+  buy: number;
+  sell: number | null;
+  variation: number;
 }
 
 export default function Dashboard() {
