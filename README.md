@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cotações Financeiras em Tempo Real
 
-## Getting Started
+Este projeto é uma aplicação web que exibe cotações financeiras de moedas, ações e Bitcoin em tempo real. Os dados são obtidos de uma API pública e o histórico de variações é armazenado para visualização em gráficos interativos.
 
-First, run the development server:
+## Funcionalidades Principais
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Visualização de Cotações:** Exibe os preços de compra e venda (quando disponíveis) e a variação diária de diversas moedas, ações e Bitcoin em cards intuitivos.
+- **Busca de Cotações:** Permite aos usuários buscar cotações específicas por código ou nome.
+- **Gráfico de Variação em Tempo Real:** Ao clicar em um card de cotação, um modal exibe um gráfico de linha mostrando a variação da cotação desde o login do usuário, com atualizações automáticas.
+- **Gerenciamento de Sessão:** Implementa um sistema de login e logout para controlar o acesso às funcionalidades.
+- **Persistência de Sessão:** A sessão do usuário é mantida utilizando `localStorage` até o logout ou expiração.
+- **Gerenciamento de Estado:** Utiliza Zustand para gerenciar o estado global da aplicação, incluindo o histórico de cotações.
+- **Interface Moderna:** Interface de usuário responsiva e estilizada com Tailwind CSS e ícones Lucide React.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tecnologias Utilizadas
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Next.js:** Framework React para construção da aplicação full-stack.
+- **React:** Biblioteca JavaScript para construção da interface de usuário.
+- **TypeScript:** Superset de JavaScript que adiciona tipagem estática.
+- **Tailwind CSS:** Framework CSS utilitário para estilização rápida e responsiva.
+- **Zustand:** Biblioteca para gerenciamento de estado simples e escalável.
+- **Recharts:** Biblioteca de gráficos React para renderizar os gráficos de variação.
+- **Lucide React:** Biblioteca de ícones vetoriais.
+- **`localStorage`:** API do navegador para persistência de dados do lado do cliente (sessão e histórico).
+- **API HG Brasil Finance:** API pública utilizada para obter os dados das cotações financeiras.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Pré-requisitos
 
-## Learn More
+- **Node.js** (versão LTS recomendada) instalado em sua máquina.
+- **npm** ou **yarn** como gerenciador de pacotes.
+- Uma chave de API da HG Brasil Finance (você pode obter uma gratuitamente em [https://hgbrasil.com/status/finance](https://hgbrasil.com/status/finance)).
 
-To learn more about Next.js, take a look at the following resources:
+## Configuração
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1.  **Clone o repositório:**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+    ```bash
+    git clone [https://github.com/guimamura/finance-app]
+    cd .\finance-app\
+    ```
 
-## Deploy on Vercel
+2.  **Instale as dependências:**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    ```bash
+    npm install
+    # ou
+    yarn install
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3.  **Configure as variáveis de ambiente:**
+    - Crie um arquivo `.env.local` na raiz do projeto.
+    - Adicione a sua chave de API da HG Brasil Finance:
+      ```
+      NEXT_PUBLIC_API_KEY=SUA_CHAVE_DE_API
+      ```
+
+## Execução
+
+1.  **Inicie o servidor de desenvolvimento:**
+
+    ```bash
+    npm run dev
+    # ou
+    yarn dev
+    ```
+
+2.  Abra seu navegador e acesse `http://localhost:3000`.
+
+## Estrutura de Pastas
+
+.
+├── app
+│ └── api
+│ └── quotes
+│ └── route.ts # Rota da API para buscar as cotações
+│ └── dashboard
+│ └── page.tsx # Componente da página do dashboard
+│ └── login
+│ └── page.tsx # Componente da página de login
+│ └── page.tsx # Componente da página inicial (redireciona para /login)
+├── components
+│ ├── QuoteCard.tsx # Componente para exibir um card de cotação
+│ ├── QuoteChart.tsx # Componente para exibir o gráfico de variação
+│ └── QuoteSearch.tsx # Componente para a barra de busca de cotações
+├── lib
+│ └── quotes.ts # Lógica para buscar e filtrar cotações (não mais usado diretamente)
+│ └── storage.ts # Utilitários para interagir com localStorage
+├── types
+│ ├── Quote.ts # Definição do tipo Quote
+│ ├── QuoteTypes.ts # Definições de tipos para dados da API
+│ └── User.ts # Definição do tipo User
+├── .env.local # Arquivo de variáveis de ambiente
+├── .gitignore
+├── next.config.js
+├── package.json
+├── postcss.config.js
+├── README.md
+├── tailwind.config.js
+└── tsconfig.json
+
+## Créditos
+
+- Este projeto utiliza dados da [HG Brasil Finance API](https://hgbrasil.com/status/finance).
+- As bibliotecas de código aberto mencionadas em "Tecnologias Utilizadas" tornaram este projeto possível.
