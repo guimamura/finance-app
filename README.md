@@ -35,8 +35,11 @@ Este projeto é uma aplicação web que exibe cotações financeiras de moedas, 
 1.  **Clone o repositório:**
 
     ```bash
-    git clone [https://github.com/guimamura/finance-app]
-    cd .\finance-app\
+    # Usando SSH
+    git clone git@github.com:guimamura/finance-app.git
+    # Ou usando HTTPS
+    git clone [https://github.com/guimamura/finance-app.git](https://github.com/guimamura/finance-app.git)
+    cd finance-app
     ```
 
 2.  **Instale as dependências:**
@@ -85,6 +88,8 @@ Este projeto é uma aplicação web que exibe cotações financeiras de moedas, 
 ├── lib
 │ └── quotes.ts # Lógica para buscar e filtrar cotações (não mais usado diretamente)
 │ └── storage.ts # Utilitários para interagir com localStorage
+├── store
+│ └── quoteHistoryStore.ts # Store do Zustand para gerenciar o histórico de cotações
 ├── types
 │ ├── Quote.ts # Definição do tipo Quote
 │ ├── QuoteTypes.ts # Definições de tipos para dados da API
