@@ -120,7 +120,7 @@ export default function Dashboard() {
           quotes.push({
             code: key,
             name: value.name,
-            buy: parseFloat(value.buy),
+            buy: parseFloat(value.buy ?? 0),
             sell: value.sell ? parseFloat(value.sell) : null,
             variation: parseFloat(value.variation || "0"),
           });
@@ -142,7 +142,7 @@ export default function Dashboard() {
         quotes.push({
           code: key,
           name: value.name,
-          buy: parseFloat(value.last),
+          buy: parseFloat(value.last ?? 0),
           sell: null,
           variation: parseFloat(value.variation || "0"),
         });
