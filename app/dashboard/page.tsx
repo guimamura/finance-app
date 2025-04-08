@@ -195,7 +195,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-6">
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <header className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold text-gray-800">
             Cotações Financeiras
