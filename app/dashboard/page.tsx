@@ -246,7 +246,7 @@ export default function Dashboard() {
                   <QuoteCard
                     name={quote.name}
                     code={quote.code}
-                    bid={quote.buy?.toString() || "N/A"}
+                    bid={quote.buy ? quote.buy?.toString() : "N/A"}
                     variation={quote.variation?.toString() || "0"}
                   />
                 </li>
