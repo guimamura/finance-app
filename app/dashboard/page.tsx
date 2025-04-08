@@ -131,7 +131,7 @@ export default function Dashboard() {
         quotes.push({
           code: key,
           name: value.name,
-          buy: parseFloat(value.points),
+          buy: parseFloat(value.points ?? 0),
           sell: null,
           variation: parseFloat(value.variation || "0"),
         });
