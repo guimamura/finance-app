@@ -261,7 +261,6 @@ export default function Dashboard() {
               <h2 className="text-xl font-semibold mb-4">
                 Variação de {selectedQuoteCode}
               </h2>
-              {console.log("currentQuoteHistory:", currentQuoteHistory)}
               <QuoteChart data={currentQuoteHistory} dataKey="variation" />
               <button
                 onClick={closeChart}
