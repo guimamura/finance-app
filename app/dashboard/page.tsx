@@ -261,13 +261,7 @@ export default function Dashboard() {
               <h2 className="text-xl font-semibold mb-4">
                 Variação de {selectedQuoteCode}
               </h2>
-              {currentQuoteHistory.length > 0 ? (
-                <QuoteChart data={currentQuoteHistory} dataKey="variation" />
-              ) : (
-                <p className="text-gray-500">
-                  Histórico de variação não disponível desde o login.
-                </p>
-              )}
+              <QuoteChart data={currentQuoteHistory} dataKey="variation" />
               <button
                 onClick={closeChart}
                 className="mt-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"

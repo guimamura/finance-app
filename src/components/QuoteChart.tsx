@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -16,6 +17,12 @@ interface QuoteChartProps {
 }
 
 const QuoteChart = ({ data, dataKey }: QuoteChartProps) => {
+  const [chartData, setChartData] = useState(data);
+
+  useEffect(() => {
+    setChartData(data);
+  }, [data]);
+
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -23,7 +30,7 @@ const QuoteChart = ({ data, dataKey }: QuoteChartProps) => {
 
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <LineChart data={data}>
+      <LineChart data={chartData}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="timestamp" tickFormatter={formatDate} />
         <YAxis domain={["auto", "auto"]} />
