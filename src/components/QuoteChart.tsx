@@ -7,9 +7,10 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
   ResponsiveContainer,
+  Tooltip,
 } from "recharts";
+import CustomTooltip from "./CustomTooltip"; // Importe o componente customizado
 
 interface QuoteChartProps {
   data: { timestamp: number; variation: number }[];
@@ -34,7 +35,7 @@ const QuoteChart = ({ data, dataKey }: QuoteChartProps) => {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="timestamp" tickFormatter={formatDate} />
         <YAxis domain={["auto", "auto"]} />
-        <Tooltip labelFormatter={(value) => formatDate(value)} />
+        <Tooltip content={<CustomTooltip />} />
         <Line
           type="monotone"
           dataKey={dataKey}

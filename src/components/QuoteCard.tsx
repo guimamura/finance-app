@@ -24,6 +24,13 @@ const QuoteCard = ({ name, code, bid, variation }: QuoteCardProps) => {
     return "text-gray-900";
   };
 
+  const formatVariation = (value: number): string => {
+    return value.toLocaleString("pt-BR", {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 3,
+    });
+  };
+
   return (
     <div className="bg-white rounded-md shadow-md p-4 flex justify-between items-center">
       <div className="flex flex-col space-y-1">
@@ -41,16 +48,8 @@ const QuoteCard = ({ name, code, bid, variation }: QuoteCardProps) => {
 
       <div className="flex items-center">
         {getVariationIndicator()}
-        <span
-          className={`text-sm font-semibold ${
-            variationNumber > 0
-              ? "text-green-600"
-              : variationNumber < 0
-              ? "text-red-600"
-              : "text-gray-500"
-          }`}
-        >
-          {variation}%
+        <span className={`text-sm font-semibold ${getVariationClass()}`}>
+          {formatVariation(variationNumber)}%
         </span>
       </div>
     </div>
